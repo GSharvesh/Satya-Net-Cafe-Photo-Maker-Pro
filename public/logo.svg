@@ -1,38 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160">
-  <defs>
-    <style>
-      .icon { fill: #1a5276; }
-      .bg   { fill: #f0f4f8; }
-    </style>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 180" width="220" height="180">
 
-  <!-- ── Passport photo frame ── -->
-  <rect x="20" y="10" width="100" height="125" rx="4" ry="4" class="icon" />
-  <rect x="27" y="17" width="86" height="111" rx="2" ry="2" class="bg" />
+  <!-- ── PHOTO FRAME (thick square border, no fill) ── -->
+  <rect x="24" y="14" width="116" height="118" rx="4" ry="4"
+        fill="none" stroke="#1e4d7b" stroke-width="10" />
 
-  <!-- ── Person silhouette ── -->
-  <!-- Head -->
-  <circle cx="70" cy="55" r="22" class="icon" />
-  <!-- Neck + shoulders -->
-  <path d="M30 128 Q30 88 70 88 Q110 88 110 128 Z" class="icon" />
+  <!-- ── PERSON SILHOUETTE ── -->
+  <!-- Head (solid navy, with white oval face cutout) -->
+  <ellipse cx="82" cy="55" rx="26" ry="28" fill="#1e4d7b" />
+  <!-- Face cutout (white oval) -->
+  <ellipse cx="82" cy="53" rx="16" ry="19" fill="#f0f4f8" />
+  <!-- Neck (white cutout) -->
+  <rect x="74" y="68" width="16" height="12" fill="#f0f4f8" />
+  <!-- Body / shoulders (solid navy) -->
+  <path d="M24 132 Q24 95 82 95 Q140 95 140 132 Z" fill="#1e4d7b" />
+  <!-- Clip body to frame bottom -->
+  <rect x="24" y="132" width="116" height="4" fill="#f0f4f8" />
 
-  <!-- ── Scissors ── -->
-  <!-- Blade 1 (top-right diagonal) -->
-  <line x1="108" y1="95" x2="175" y2="30" stroke="#1a5276" stroke-width="11" stroke-linecap="round" />
-  <!-- Blade 2 (lower-right diagonal) -->
-  <line x1="108" y1="95" x2="190" y2="115" stroke="#1a5276" stroke-width="11" stroke-linecap="round" />
+  <!-- ── SCISSORS ── -->
+  <!-- 
+    Pivot sits at roughly (138, 108) — just outside frame bottom-right corner.
+    Blade 1 goes upper-right toward ~(195, 50).
+    Blade 2 goes lower-right toward ~(195, 145).
+    Handle 1: large ring, lower-left of pivot.
+    Handle 2: smaller ring, right of pivot.
+  -->
 
-  <!-- Pivot screw -->
-  <circle cx="108" cy="95" r="8" class="icon" />
-  <circle cx="108" cy="95" r="4" class="bg" />
+  <!-- Blade 1 (upper blade going upper-right) -->
+  <line x1="130" y1="106" x2="196" y2="48"
+        stroke="#1e4d7b" stroke-width="12" stroke-linecap="round" />
 
-  <!-- Handle ring 1 (upper) -->
-  <circle cx="168" cy="150" r="16" fill="none" stroke="#1a5276" stroke-width="10" />
-  <!-- Shank connecting blade1 to ring1 -->
-  <line x1="108" y1="95" x2="157" y2="140" stroke="#1a5276" stroke-width="11" stroke-linecap="round" />
+  <!-- Blade 2 (lower blade going lower-right) -->
+  <line x1="130" y1="112" x2="196" y2="152"
+        stroke="#1e4d7b" stroke-width="12" stroke-linecap="round" />
 
-  <!-- Handle ring 2 (lower-right) -->
-  <circle cx="192" cy="45" r="16" fill="none" stroke="#1a5276" stroke-width="10" />
-  <!-- Shank connecting blade2 to ring2 -->
-  <line x1="108" y1="95" x2="181" y2="55" stroke="#1a5276" stroke-width="11" stroke-linecap="round" />
+  <!-- Pivot screw circle -->
+  <circle cx="130" cy="109" r="9" fill="#1e4d7b" />
+  <circle cx="130" cy="109" r="4.5" fill="#f0f4f8" />
+
+  <!-- Handle 1 shank (extends lower-left from pivot) -->
+  <line x1="130" y1="109" x2="106" y2="142"
+        stroke="#1e4d7b" stroke-width="12" stroke-linecap="round" />
+  <!-- Handle 1 ring (large, bottom-center) -->
+  <circle cx="96" cy="156" r="18" fill="none" stroke="#1e4d7b" stroke-width="11" />
+
+  <!-- Handle 2 shank (extends right from pivot) -->
+  <line x1="130" y1="109" x2="170" y2="115"
+        stroke="#1e4d7b" stroke-width="12" stroke-linecap="round" />
+  <!-- Handle 2 ring (smaller, right side) -->
+  <circle cx="184" cy="117" r="14" fill="none" stroke="#1e4d7b" stroke-width="11" />
+
 </svg>
