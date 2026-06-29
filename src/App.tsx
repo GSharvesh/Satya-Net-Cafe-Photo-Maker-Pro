@@ -16,6 +16,8 @@ import {
   Moon, Sun, Camera, Plus, Undo2, Redo2, PlusCircle,
 } from 'lucide-react';
 
+const LOGO_URL = '/logo.svg';
+
 export default function App() {
   const store = usePhotoStore();
 
@@ -102,8 +104,12 @@ export default function App() {
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className={`border-b px-5 py-2.5 flex items-center justify-between sticky top-0 z-20 ${hdr}`} role="banner">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-            <Camera size={18} className="text-white"/>
+          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm" aria-hidden="true">
+            <img
+              src={LOGO_URL}
+              alt="Satya Net Cafe – Photo Maker Pro logo"
+              className="w-9 h-9 object-contain"
+            />
           </div>
           <div>
             <h1 className={`text-base font-bold leading-tight ${brand}`}>Satya-Net-Cafe – Photo Maker Pro</h1>

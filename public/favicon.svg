@@ -1,25 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <!-- Background rounded square -->
-  <rect width="64" height="64" rx="14" ry="14" fill="url(#bg)" />
-  <!-- Camera body -->
-  <rect x="10" y="22" width="44" height="30" rx="5" ry="5" fill="white" opacity="0.95" />
-  <!-- Camera lens outer -->
-  <circle cx="32" cy="37" r="10" fill="#1e40af" />
-  <!-- Camera lens inner -->
-  <circle cx="32" cy="37" r="7" fill="#93c5fd" />
-  <!-- Camera lens highlight -->
-  <circle cx="32" cy="37" r="4" fill="white" opacity="0.8" />
-  <!-- Camera viewfinder notch -->
-  <path d="M24 22 L28 15 L36 15 L40 22 Z" fill="white" opacity="0.95" />
-  <!-- Camera flash dot -->
-  <circle cx="48" cy="27" r="3" fill="#fbbf24" />
-  <!-- S letter for Satya -->
-  <text x="32" y="41" font-family="Arial, sans-serif" font-size="8" font-weight="900"
-        text-anchor="middle" fill="#1e40af" dominant-baseline="middle">S</text>
+  <!-- Rounded background -->
+  <rect width="64" height="64" rx="12" ry="12" fill="url(#bg)" />
+
+  <!-- Mini photo frame -->
+  <rect x="8" y="6" width="32" height="40" rx="2" ry="2" fill="white" opacity="0.95" />
+  <rect x="11" y="9" width="26" height="34" rx="1" ry="1" fill="#d6eaf8" />
+
+  <!-- Person head -->
+  <circle cx="24" cy="22" r="7" fill="#1a5276" />
+  <!-- Person shoulders -->
+  <path d="M11 43 Q11 33 24 33 Q37 33 37 43 Z" fill="#1a5276" />
+
+  <!-- Scissors pivot -->
+  <circle cx="35" cy="35" r="3.5" fill="#1a5276" />
+  <circle cx="35" cy="35" r="1.8" fill="white" />
+
+  <!-- Blade top -->
+  <line x1="35" y1="35" x2="56" y2="14" stroke="#1a5276" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Blade bottom -->
+  <line x1="35" y1="35" x2="58" y2="44" stroke="#1a5276" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Handle ring top -->
+  <circle cx="54" cy="57" r="5.5" fill="none" stroke="#1a5276" stroke-width="3.5" />
+  <line x1="35" y1="35" x2="50" y2="53" stroke="#1a5276" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Handle ring bottom -->
+  <circle cx="61" cy="23" r="5.5" fill="none" stroke="#1a5276" stroke-width="3.5" />
+  <line x1="35" y1="35" x2="57" y2="28" stroke="#1a5276" stroke-width="3.5" stroke-linecap="round" />
 </svg>
