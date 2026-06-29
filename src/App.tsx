@@ -100,14 +100,14 @@ export default function App() {
     <div className={`min-h-screen ${bg} flex flex-col`}>
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className={`border-b px-5 py-2.5 flex items-center justify-between sticky top-0 z-20 ${hdr}`}>
+      <header className={`border-b px-5 py-2.5 flex items-center justify-between sticky top-0 z-20 ${hdr}`} role="banner">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0" aria-hidden="true">
             <Camera size={18} className="text-white"/>
           </div>
           <div>
-            <h1 className={`text-base font-bold leading-tight ${brand}`}>PhotoPrint Pro</h1>
-            <p className={`text-xs ${sub}`}>Multi-Photo Passport &amp; Stamp Maker</p>
+            <h1 className={`text-base font-bold leading-tight ${brand}`}>Satya-Net-Cafe – Photo Maker Pro</h1>
+            <p className={`text-xs ${sub}`}>Passport · Stamp · Visa · ID Card Photo Printing</p>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export default function App() {
       </header>
 
       {/* ── MAIN 3-COLUMN LAYOUT ────────────────────────────────────────────── */}
-      <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 53px)' }}>
+      <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 53px - 44px)' }} role="main" aria-label="Photo Maker Workspace">
 
         {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
         <aside className={`w-72 flex-shrink-0 overflow-y-auto p-3 space-y-3 border-r ${sidebar} ${dark ? 'border-slate-700' : 'border-gray-200'}`}>
@@ -253,6 +253,7 @@ export default function App() {
               <div className="text-center">
                 <p className="font-medium text-sm">No photo selected</p>
                 <p className="text-xs mt-1 opacity-70">Click "Add First Photo" to get started</p>
+                <p className="text-xs mt-0.5 opacity-50">Passport · Stamp · Visa · ID Card</p>
               </div>
               <button onClick={handleAddAnother}
                 className="mt-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition flex items-center gap-2">
@@ -280,6 +281,27 @@ export default function App() {
         </section>
 
       </main>
+
+      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
+      <footer
+        className={`border-t px-5 py-3 flex flex-wrap items-center justify-between gap-2 text-xs ${dark ? 'border-slate-700 bg-slate-900 text-slate-400' : 'border-gray-200 bg-white text-gray-500'}`}
+        role="contentinfo"
+      >
+        <address className="not-italic flex flex-wrap items-center gap-3">
+          <span className={`font-semibold ${dark ? 'text-slate-200' : 'text-gray-700'}`}>Satya Net Cafe</span>
+          <span>73/25 Mohammadien Street, Perambur, Chennai – 600011</span>
+          <a
+            href="tel:+919940155512"
+            className="text-blue-400 hover:text-blue-300 transition"
+            aria-label="Call Satya Net Cafe"
+          >
+            +91 99401 55512
+          </a>
+        </address>
+        <span className={dark ? 'text-slate-500' : 'text-gray-400'}>
+          © 2026 Satya-Net-Cafe – Photo Maker Pro
+        </span>
+      </footer>
     </div>
   );
 }

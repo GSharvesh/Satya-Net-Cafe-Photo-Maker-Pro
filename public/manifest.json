@@ -1,0 +1,29 @@
+{
+  "name": "Satya-Net-Cafe – Photo Maker Pro",
+  "short_name": "SNC Photo Maker",
+  "description": "Professional Passport, Stamp & ID Photo Printing for Xerox Shops – Satya Net Cafe, Perambur, Chennai",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "categories": ["utilities", "productivity", "photo"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Satya-Net-Cafe – Photo Maker Pro",
+      "short_name": "Photo Maker",
+      "description": "Open Passport & Stamp Photo Maker",
+      "url": "/",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

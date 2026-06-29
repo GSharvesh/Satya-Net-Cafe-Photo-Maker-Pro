@@ -94,7 +94,7 @@ export async function generatePDF(opts: GenerateOptions): Promise<void> {
   }
 
   const tag = layout.isLandscape ? 'landscape' : 'portrait';
-  pdf.save(`passport-photos-${paper.label}-${tag}.pdf`);
+  pdf.save(`satya-net-cafe-photo-maker-${paper.label}-${tag}.pdf`);
 }
 
 // ─── Shared canvas renderer ───────────────────────────────────────────────────
@@ -241,7 +241,7 @@ export async function generateImage(
   const dataUrl = await final;
   const a       = document.createElement('a');
   a.href        = dataUrl;
-  a.download    = `passport-photos-p${page + 1}.${format}`;
+  a.download    = `satya-net-cafe-photos-p${page + 1}.${format}`;
   a.click();
   void dataUrls; // suppress unused warning
 }
@@ -270,9 +270,10 @@ export async function printPages(
   ).join('\n');
 
   const html = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
+<title>Satya-Net-Cafe – Photo Maker Pro | Print</title>
 <style>
   @page {
     size: ${pw}mm ${ph}mm;

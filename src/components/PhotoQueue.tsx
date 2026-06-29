@@ -58,7 +58,7 @@ export const PhotoQueue: React.FC<Props> = ({
               <div className="w-10 h-12 rounded overflow-hidden flex-shrink-0 border border-slate-600">
                 <img
                   src={entry.croppedUrl}
-                  alt={entry.name || 'photo'}
+                  alt={`${entry.photoType === 'passport' ? 'Passport' : 'Stamp'} photo of ${entry.name || `Photo ${idx + 1}`}`}
                   className="w-full h-full object-cover"
                 />
               </div>

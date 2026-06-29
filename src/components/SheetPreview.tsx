@@ -78,10 +78,10 @@ export const SheetPreview: React.FC<Props> = ({
   const defaultH = slots[0]?.entry.photoSize.heightMm ?? 45;
 
   return (
-    <div className={`rounded-xl border shadow-sm flex flex-col h-full overflow-hidden ${card}`}>
+    <div className={`rounded-xl border shadow-sm flex flex-col h-full overflow-hidden ${card}`} role="region" aria-label="Sheet Preview">
 
       {/* ── Header ── */}
-      <div className={`px-3 py-2 flex items-center justify-between flex-shrink-0 border-b gap-2 flex-wrap ${dark ? 'border-slate-600' : 'border-gray-200'}`}>
+      <header className={`px-3 py-2 flex items-center justify-between flex-shrink-0 border-b gap-2 flex-wrap ${dark ? 'border-slate-600' : 'border-gray-200'}`}>
         <div className="flex items-center gap-2">
           <h2 className={`font-semibold text-sm ${lbl}`}>{paper.label} Preview</h2>
           {/* Orientation badge */}
@@ -133,9 +133,7 @@ export const SheetPreview: React.FC<Props> = ({
             </button>
           </div>
         </div>
-      </div>
-
-      {/* ── Page navigation ── */}
+      </header>
       {totalPagesCount > 1 && (
         <div className={`px-4 py-1.5 flex items-center justify-center gap-3 flex-shrink-0 border-b ${dark ? 'border-slate-700' : 'border-gray-100'}`}>
           <button
@@ -222,14 +220,15 @@ export const SheetPreview: React.FC<Props> = ({
       </div>
 
       {/* ── Footer ── */}
-      <div className={`px-4 py-1.5 text-xs flex flex-wrap gap-3 flex-shrink-0 border-t ${dark ? 'border-slate-700 text-slate-400' : 'border-gray-100 text-gray-500'}`}>
+      <footer className={`px-4 py-1.5 text-xs flex flex-wrap gap-3 flex-shrink-0 border-t ${dark ? 'border-slate-700 text-slate-400' : 'border-gray-100 text-gray-500'}`}>
         <span>{layout.sheetWidthMm}×{layout.sheetHeightMm} mm</span>
         <span>{layout.cols}×{layout.rows} grid · {layout.photosPerPage}/page</span>
         <span>{slots.length} photos total</span>
         <span className={layout.isLandscape ? 'text-purple-400' : 'text-sky-400'}>
           {orientLabel}
         </span>
-      </div>
+        <span className={`ml-auto ${dark ? 'text-slate-600' : 'text-gray-300'}`}>Satya-Net-Cafe – Photo Maker Pro</span>
+      </footer>
     </div>
   );
 };

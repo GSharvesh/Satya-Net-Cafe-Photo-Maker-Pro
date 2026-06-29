@@ -97,10 +97,10 @@ export const AddPhotoPanel: React.FC<Props> = ({ onAdd, dark, editEntry }) => {
      }`;
 
   return (
-    <div className={`rounded-xl border p-4 shadow-sm space-y-3 ${card}`}>
+    <div className={`rounded-xl border p-4 shadow-sm space-y-3 ${card}`} role="region" aria-label="Add Photo Panel">
       <h3 className={`font-semibold flex items-center gap-2 ${lbl}`}>
-        <ImageIcon size={16} />
-        {draft ? 'Configure Photo' : 'Add Photo'}
+        <ImageIcon size={16} aria-hidden="true" />
+        {draft ? 'Configure Photo' : 'Add Passport / Stamp Photo'}
       </h3>
 
       {/* Upload zone */}
@@ -125,7 +125,7 @@ export const AddPhotoPanel: React.FC<Props> = ({ onAdd, dark, editEntry }) => {
         <>
           {/* Preview + change */}
           <div className="relative rounded-lg overflow-hidden h-28">
-            <img src={draft.dataUrl} alt="preview" className="w-full h-full object-cover" />
+            <img src={draft.dataUrl} alt={`Preview of ${draft.name || draft.fileName}`} className="w-full h-full object-cover" />
             <button
               onClick={() => { setDraft(null); inputRef.current?.click(); }}
               className="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-xs px-2 py-0.5 rounded hover:bg-black/80"
