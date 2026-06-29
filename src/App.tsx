@@ -1,216 +1,280 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Area } from 'react-easy-crop';
 
-import { UploadPanel }        from './components/UploadPanel';
-import { PhotoTypeSelector }  from './components/PhotoTypeSelector';
-import { CropEditor }         from './components/CropEditor';
-import { CopyCountSelector }  from './components/CopyCountSelector';
-import { SettingsPanel }      from './components/SettingsPanel';
-import { A4Preview }          from './components/A4Preview';
-import { ExportControls }     from './components/ExportControls';
+import { AddPhotoPanel }   from './components/AddPhotoPanel';
+import { CropEditor }      from './components/CropEditor';
+import { PhotoQueue }      from './components/PhotoQueue';
+import { SheetPreview }    from './components/SheetPreview';
+import { SettingsPanel }   from './components/SettingsPanel';
+import { ExportControls }  from './components/ExportControls';
 
-import type { PhotoType, PhotoSettings, PhotoSize } from './types';
-import { PHOTO_SIZES, computeLayout } from './types';
-import { getCroppedImg } from './utils/cropImage';
-import { Moon, Sun, Camera } from 'lucide-react';
+import { usePhotoStore }   from './store/usePhotoStore';
+import type { PhotoEntry, CropArea, BorderType } from './types';
+import { PHOTO_SIZES } from './types';
+import { getCroppedImg }   from './utils/cropImage';
 
-interface ImageInfo {
-  dataUrl: string;
-  name: string;
-  dimensions: { w: number; h: number };
-}
-
-const DEFAULT_SETTINGS: PhotoSettings = {
-  photoType:       'passport',
-  copies:          8,
-  border:          'thin',
-  backgroundColor: 'white',
-  customColor:     '#ffffff',
-  showCutMarks:    true,
-  darkMode:        true,
-};
+import {
+  Moon, Sun, Camera, Plus, Undo2, Redo2, PlusCircle,
+} from 'lucide-react';
 
 export default function App() {
-  const [imageInfo,        setImageInfo]        = useState<ImageInfo | null>(null);
-  const [croppedAreaPx,    setCroppedAreaPx]    = useState<Area | null>(null);
-  const [croppedImageUrl,  setCroppedImageUrl]  = useState<string | null>(null);
-  const [settings,         setSettings]         = useState<PhotoSettings>(DEFAULT_SETTINGS);
-  const [previewZoom,      setPreviewZoom]      = useState(0.55);
-  const [currentPage,      setCurrentPage]      = useState(0);
-  const [isCropProcessing, setIsCropProcessing] = useState(false);
+  const store = usePhotoStore();
 
-  const dark = settings.darkMode;
+  // Which entry is open in the crop editor
+  const [editingId,   setEditingId]   = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [processing,  setProcessing]  = useState(false);
+  const [previewZoom, setPreviewZoom] = useState(0.5);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  // Derive sizes
-  const photoSize: PhotoSize = (() => {
-    if (settings.photoType === 'custom') return PHOTO_SIZES.passport; // fallback
-    return PHOTO_SIZES[settings.photoType];
-  })();
+  const dark = store.settings.darkMode;
 
-  const layout = computeLayout(photoSize, settings.copies);
-
-  // Reset page when layout changes
-  useEffect(() => { setCurrentPage(0); }, [layout.totalPages]);
-
-  // Auto-re-crop when photo type changes
+  // Auto-select first entry for crop when queue is empty and new one added
   useEffect(() => {
-    if (imageInfo && croppedAreaPx) {
-      applyCrop();
+    if (store.queue.length === 1 && !editingId) {
+      setEditingId(store.queue[0].id);
+      setShowAddForm(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.photoType]);
+  }, [store.queue.length]);
 
-  const handleImageLoaded = (dataUrl: string, name: string, dimensions: { w: number; h: number }) => {
-    setImageInfo({ dataUrl, name, dimensions });
-    setCroppedImageUrl(null);
-    setCroppedAreaPx(null);
-  };
+  // Clamp page
+  useEffect(() => {
+    setCurrentPage(p => Math.min(p, Math.max(0, store.numPages - 1)));
+  }, [store.numPages]);
 
-  const handleCropComplete = useCallback((_: Area, pixels: Area) => {
-    setCroppedAreaPx(pixels);
-  }, []);
+  const editingEntry = editingId ? store.queue.find(e => e.id === editingId) ?? null : null;
 
-  const applyCrop = async () => {
-    if (!imageInfo || !croppedAreaPx) return;
-    setIsCropProcessing(true);
+  // ── handlers ───────────────────────────────────────────────────────────────
+  const handleAddEntry = useCallback((partial: Omit<PhotoEntry, 'id'>) => {
+    const id = crypto.randomUUID();
+    const entry: PhotoEntry = { ...partial, id };
+    store.addEntry(entry);
+    setEditingId(id);
+    setShowAddForm(false);
+  }, [store]);
+
+  const handleCropConfirm = useCallback(async (
+    cropAreaPx: CropArea,
+    zoom: number,
+    rotation: number,
+  ) => {
+    if (!editingEntry) return;
+    setProcessing(true);
     try {
-      const url = await getCroppedImg(
-        imageInfo.dataUrl,
-        croppedAreaPx,
-        0,
-        photoSize.widthMm  * 10,   // preview size (approx)
-        photoSize.heightMm * 10,
-      );
-      if (croppedImageUrl) URL.revokeObjectURL(croppedImageUrl);
-      setCroppedImageUrl(url);
+      const w   = editingEntry.photoSize.widthMm  * 10;
+      const h   = editingEntry.photoSize.heightMm * 10;
+      const url = await getCroppedImg(editingEntry.originalDataUrl, cropAreaPx, rotation, w, h);
+      store.updateEntry(editingEntry.id, { croppedUrl: url, cropAreaPx, zoom, rotation });
     } catch (e) {
       console.error(e);
     } finally {
-      setIsCropProcessing(false);
+      setProcessing(false);
     }
+  }, [editingEntry, store]);
+
+  const handleCropChange = useCallback((_px: CropArea, _zoom: number, _rot: number) => {
+    // live preview update (optional — we update on confirm only for performance)
+  }, []);
+
+  const handleSelectEntry = (id: string) => {
+    setEditingId(id);
+    setShowAddForm(false);
   };
 
-  const patchSettings = (patch: Partial<PhotoSettings>) => {
-    setSettings((prev) => ({ ...prev, ...patch }));
+  const handleAddAnother = () => {
+    setEditingId(null);
+    setShowAddForm(true);
   };
 
-  // Theming
-  const bg      = dark ? 'bg-slate-900'      : 'bg-gray-100';
-  const sidebar = dark ? 'bg-slate-800/60'   : 'bg-white/80';
-  const header  = dark ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200';
-  const brand   = dark ? 'text-white' : 'text-gray-900';
-  const sub     = dark ? 'text-slate-400' : 'text-gray-500';
+  const handleBorderChange = (border: BorderType) => {
+    if (editingId) store.updateEntry(editingId, { border });
+  };
+
+  // ── theming ────────────────────────────────────────────────────────────────
+  const bg      = dark ? 'bg-slate-900'    : 'bg-gray-100';
+  const sidebar = dark ? 'bg-slate-900'    : 'bg-gray-50';
+  const hdr     = dark ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200';
+  const brand   = dark ? 'text-white'      : 'text-gray-900';
+  const sub     = dark ? 'text-slate-400'  : 'text-gray-500';
 
   return (
     <div className={`min-h-screen ${bg} flex flex-col`}>
-      {/* ── HEADER ── */}
-      <header className={`border-b px-6 py-3 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm ${header}`}>
+
+      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
+      <header className={`border-b px-5 py-2.5 flex items-center justify-between sticky top-0 z-20 ${hdr}`}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Camera size={20} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <Camera size={18} className="text-white"/>
           </div>
           <div>
-            <h1 className={`text-lg font-bold leading-tight ${brand}`}>PhotoPrint Pro</h1>
-            <p className={`text-xs ${sub}`}>Passport &amp; Stamp Photo Maker</p>
+            <h1 className={`text-base font-bold leading-tight ${brand}`}>PhotoPrint Pro</h1>
+            <p className={`text-xs ${sub}`}>Multi-Photo Passport &amp; Stamp Maker</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          {imageInfo && (
+        <div className="flex items-center gap-2">
+          {/* Undo / Redo */}
+          <button onClick={store.undo} disabled={!store.canUndo} title="Undo"
+            className={`w-8 h-8 rounded-lg border flex items-center justify-center transition disabled:opacity-30
+              ${dark ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+            <Undo2 size={14}/>
+          </button>
+          <button onClick={store.redo} disabled={!store.canRedo} title="Redo"
+            className={`w-8 h-8 rounded-lg border flex items-center justify-center transition disabled:opacity-30
+              ${dark ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+            <Redo2 size={14}/>
+          </button>
+
+          {/* Stats */}
+          {store.totalCopies > 0 && (
             <span className={`text-xs hidden sm:block ${sub}`}>
-              {imageInfo.name} • {imageInfo.dimensions.w}×{imageInfo.dimensions.h}px
+              {store.queue.length} photo{store.queue.length !== 1 ? 's' : ''} · {store.totalCopies} copies · {store.numPages} page{store.numPages !== 1 ? 's' : ''}
             </span>
           )}
-          <button
-            onClick={() => patchSettings({ darkMode: !dark })}
-            className={`w-9 h-9 rounded-lg border flex items-center justify-center transition
-              ${dark
-                ? 'bg-slate-700 border-slate-600 text-yellow-300 hover:bg-slate-600'
-                : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'
-              }`}
-          >
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
+
+          {/* Dark mode */}
+          <button onClick={() => store.patchSettings({ darkMode: !dark })}
+            className={`w-8 h-8 rounded-lg border flex items-center justify-center transition
+              ${dark ? 'bg-slate-700 border-slate-600 text-yellow-300 hover:bg-slate-600' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'}`}>
+            {dark ? <Sun size={15}/> : <Moon size={15}/>}
           </button>
         </div>
       </header>
 
-      {/* ── MAIN LAYOUT ── */}
-      <main className="flex-1 flex gap-0 overflow-hidden" style={{ height: 'calc(100vh - 61px)' }}>
+      {/* ── MAIN 3-COLUMN LAYOUT ────────────────────────────────────────────── */}
+      <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 53px)' }}>
 
-        {/* ── LEFT PANEL ── */}
+        {/* ── LEFT PANEL ──────────────────────────────────────────────────── */}
         <aside className={`w-72 flex-shrink-0 overflow-y-auto p-3 space-y-3 border-r ${sidebar} ${dark ? 'border-slate-700' : 'border-gray-200'}`}>
-          <UploadPanel
-            onImageLoaded={handleImageLoaded}
-            currentImage={imageInfo?.dataUrl ?? null}
+
+          {/* Photo Queue */}
+          <PhotoQueue
+            queue={store.queue}
+            activeId={editingId}
+            onSelect={handleSelectEntry}
+            onDelete={store.removeEntry}
+            onDuplicate={store.duplicateEntry}
+            onMove={store.reorderEntry}
             dark={dark}
           />
 
-          <PhotoTypeSelector
-            value={settings.photoType as PhotoType}
-            onChange={(t) => patchSettings({ photoType: t })}
-            dark={dark}
-          />
+          {/* Add Photo form or button */}
+          {showAddForm ? (
+            <AddPhotoPanel onAdd={handleAddEntry} dark={dark}/>
+          ) : (
+            <button
+              onClick={handleAddAnother}
+              className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-500/50 text-blue-400 hover:border-blue-500 hover:bg-blue-500/10 transition font-medium text-sm"
+            >
+              <PlusCircle size={16}/>
+              {store.queue.length === 0 ? 'Add First Photo' : 'Add Another Photo'}
+            </button>
+          )}
 
-          <CopyCountSelector
-            value={settings.copies}
-            onChange={(n) => patchSettings({ copies: n })}
-            dark={dark}
-          />
-
+          {/* Sheet Settings */}
           <SettingsPanel
-            settings={settings}
-            onChange={patchSettings}
+            settings={store.settings}
+            onChange={store.patchSettings}
+            activeBorder={editingEntry?.border ?? 'thin'}
+            onBorderChange={handleBorderChange}
             dark={dark}
           />
 
+          {/* Export */}
           <ExportControls
-            croppedImageUrl={croppedImageUrl}
-            settings={settings}
-            photoSize={photoSize}
-            layout={layout}
+            slots={store.slots}
+            layout={store.layout}
+            paper={store.paper}
+            settings={store.settings}
+            orientation={store.settings.orientation}
+            totalPagesCount={store.numPages}
+            currentPage={currentPage}
             dark={dark}
           />
         </aside>
 
-        {/* ── CENTER PANEL (Crop) ── */}
-        <section className="flex-1 overflow-y-auto p-3 min-w-0" style={{ maxWidth: 520 }}>
-          {imageInfo ? (
-            <>
+        {/* ── CENTER PANEL (Crop Editor) ───────────────────────────────────── */}
+        <section className="flex-shrink-0 overflow-y-auto p-3" style={{ width: 480 }}>
+          {editingEntry ? (
+            <div className="space-y-3">
+              {/* Entry header */}
+              <div className={`flex items-center justify-between px-4 py-2 rounded-xl border ${dark ? 'bg-slate-800 border-slate-600 text-slate-200' : 'bg-white border-gray-200 text-gray-700'}`}>
+                <span className="text-sm font-medium">{editingEntry.name || 'Photo'}</span>
+                <div className="flex items-center gap-2 text-xs">
+                  {/* Copies inline edit */}
+                  <span className={dark ? 'text-slate-400' : 'text-gray-500'}>Copies:</span>
+                  <input
+                    type="number" min={1} max={500}
+                    value={editingEntry.copies}
+                    onChange={e => store.updateEntry(editingEntry.id, { copies: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className={`w-14 text-center rounded border px-1 py-0.5 font-bold text-sm
+                      ${dark ? 'bg-slate-700 border-slate-500 text-white' : 'bg-gray-50 border-gray-300 text-gray-800'}`}
+                  />
+                  {/* Photo type toggle */}
+                  <button
+                    onClick={() => {
+                      const next = editingEntry.photoType === 'passport' ? 'stamp' : 'passport';
+                      store.updateEntry(editingEntry.id, { photoType: next, photoSize: PHOTO_SIZES[next] });
+                    }}
+                    className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition font-medium"
+                  >
+                    {editingEntry.photoType === 'passport' ? 'Passport' : 'Stamp'} ↕
+                  </button>
+                </div>
+              </div>
+
               <CropEditor
-                imageSrc={imageInfo.dataUrl}
-                photoSize={photoSize}
-                onCropComplete={handleCropComplete}
-                onConfirm={applyCrop}
+                imageSrc={editingEntry.originalDataUrl}
+                photoSize={editingEntry.photoSize}
+                initialZoom={editingEntry.zoom}
+                initialRotation={editingEntry.rotation}
+                onCropComplete={(px, z, r) => handleCropChange(px, z, r)}
+                onConfirm={handleCropConfirm}
                 dark={dark}
               />
-              {isCropProcessing && (
-                <div className="mt-2 text-center text-sm text-blue-400 animate-pulse">
-                  Processing crop…
-                </div>
+
+              {processing && (
+                <p className="text-center text-sm text-blue-400 animate-pulse">Processing crop…</p>
               )}
-            </>
+
+              {/* Add Another button below editor */}
+              <button
+                onClick={handleAddAnother}
+                className="w-full py-2 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-green-500/40 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition text-sm font-medium"
+              >
+                <Plus size={14}/> Add Another Photo
+              </button>
+            </div>
+          ) : showAddForm ? (
+            <AddPhotoPanel onAdd={handleAddEntry} dark={dark}/>
           ) : (
-            <div className={`h-full flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed ${dark ? 'border-slate-600 text-slate-500' : 'border-gray-300 text-gray-400'}`}>
-              <Camera size={48} className="opacity-30" />
+            <div className={`h-full flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed
+              ${dark ? 'border-slate-600 text-slate-500' : 'border-gray-300 text-gray-400'}`}>
+              <Camera size={44} className="opacity-25"/>
               <div className="text-center">
-                <p className="font-medium text-sm">No photo uploaded yet</p>
-                <p className="text-xs mt-1 opacity-70">Upload a photo from the left panel to start</p>
+                <p className="font-medium text-sm">No photo selected</p>
+                <p className="text-xs mt-1 opacity-70">Click "Add First Photo" to get started</p>
               </div>
+              <button onClick={handleAddAnother}
+                className="mt-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition flex items-center gap-2">
+                <Plus size={14}/> Add First Photo
+              </button>
             </div>
           )}
         </section>
 
-        {/* ── RIGHT PANEL (A4 Preview) ── */}
-        <section className={`flex-1 overflow-hidden p-3 border-l ${dark ? 'border-slate-700' : 'border-gray-200'}`}>
-          <A4Preview
-            croppedImageUrl={croppedImageUrl}
-            settings={settings}
-            photoSize={photoSize}
-            layout={layout}
+        {/* ── RIGHT PANEL (Preview) ────────────────────────────────────────── */}
+        <section className={`flex-1 min-w-0 p-3 border-l ${dark ? 'border-slate-700' : 'border-gray-200'}`}>
+          <SheetPreview
+            slots={store.slots}
+            layout={store.layout}
+            paper={store.paper}
+            settings={store.settings}
+            totalPagesCount={store.numPages}
             zoom={previewZoom}
             onZoomChange={setPreviewZoom}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            onOrientationChange={store.setOrientation}
             dark={dark}
           />
         </section>

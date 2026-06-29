@@ -21,23 +21,4 @@
   border-radius: 8px;
 }
 
-/* Print styles */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #print-area,
-  #print-area * {
-    visibility: visible;
-  }
-  #print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 210mm;
-  }
-  @page {
-    size: A4;
-    margin: 0;
-  }
-}
+/* Print styles — handled via canvas/iframe pipeline, no DOM print needed */
